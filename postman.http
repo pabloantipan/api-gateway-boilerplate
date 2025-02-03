@@ -1,0 +1,19 @@
+@hostname = http://localhost
+@port = 8080
+@host = {{hostname}}:{{port}}
+
+
+### Health check
+GET {{host}}/health  HTTP/1.1
+
+
+### Create a new player
+POST {{host}}/api/v1/players  HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "age": 25,
+  "position": "Midfielder",
+  "rating": 23
+}

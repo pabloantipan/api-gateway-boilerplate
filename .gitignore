@@ -1,0 +1,50 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go specific
+/vendor/
+/go.work
+
+# Binary output directory
+/bin/
+/dist/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+.env
+
+# Gin temp files
+gin-bin
+
+# Log files
+*.log
+
+# Air live reload
+tmp/
+
+# Local development environment
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug files
+debug*
+
+# Test coverage
+coverage.html
+coverage.out
+
+# Dependency directories (remove if you're committing vendor/)
+/vendor/
+/Godeps/
