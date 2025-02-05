@@ -7,17 +7,17 @@ import (
 )
 
 type GatewayHandler struct {
-	service service.GatewayService
+	gatewayService service.GatewayService
 }
 
 func NewGatewayHandler(svc service.GatewayService) *GatewayHandler {
 	return &GatewayHandler{
-		service: svc,
+		gatewayService: svc,
 	}
 }
 
 func (h *GatewayHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	err := h.service.ProxyRequest(w, r)
+	err := h.gatewayService.ProxyRequest(w, r)
 	if err != nil {
 		http.Error(w, "Service not found", http.StatusNotFound)
 		return

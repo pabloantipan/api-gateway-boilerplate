@@ -5,21 +5,54 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gobwas/glob"
 	"github.com/pabloantipan/go-api-gateway-poc/internal/service"
 )
 
 type AuthMiddleware struct {
-	authService service.AuthService
+	authService    service.AuthService
+	whitelistPaths []glob.Glob
 }
 
-func NewAuthMiddleware(as service.AuthService) *AuthMiddleware {
+func NewAuthMiddleware(authService service.AuthService, whitelistedPaths []string) *AuthMiddleware {
+	// Compile whitelist paths
+	patterns := make([]glob.Glob, 0, len(whitelistedPaths))
+	for _, path := range whitelistedPaths {
+		if g, err := glob.Compile(path); err != nil {
+			patterns = append(patterns, g)
+		}
+	}
+
 	return &AuthMiddleware{
-		authService: as,
+		authService:    authService,
+		whitelistPaths: patterns,
 	}
 }
 
+func (m *AuthMiddleware) isWhitelisted(path string) bool {
+	// Clean and normalize
+	cleanPath := strings.TrimSpace(path)
+	cleanPath = strings.Trim(cleanPath, "/")
+
+	// Check if path is whitelisted
+	for _, pattern := range m.whitelistPaths {
+		if pattern.Match(cleanPath) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (m *AuthMiddleware) Handle(next http.Handler) http.Handler {
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Check if path is whitelisted
+		if m.isWhitelisted(r.URL.Path) {
+			r.Header.Set("X-User-ID", "whitelisted")
+			return
+		}
+
 		token := extractToken(r)
 		if token == "" {
 			http.Error(w, "Unauthorized - No token provided", http.StatusUnauthorized)
@@ -34,6 +67,8 @@ func (m *AuthMiddleware) Handle(next http.Handler) http.Handler {
 
 		// Add user info to context
 		ctx := context.WithValue(r.Context(), "userID", userID)
+		r.Header.Set("X-User-ID", userID)
+
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

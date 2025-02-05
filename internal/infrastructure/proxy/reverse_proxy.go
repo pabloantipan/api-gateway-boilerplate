@@ -41,8 +41,18 @@ func (f *ProxyFactory) GetProxy(targetURL string) (*httputil.ReverseProxy, error
 	originalDirector := proxy.Director
 	proxy.Director = func(req *http.Request) {
 		originalDirector(req)
+
+		// Preserve the target host
 		req.Header.Add("X-Gateway", "api-gateway")
 		req.Host = target.Host
+
+		// Add gateway headers
+		req.Header.Add("X-Gateway", "api-gateway")
+
+		// UserID already set by auth middleware
+		if userID := req.Header.Get("X-User-ID"); userID != "" {
+			req.Header.Add("X-User-ID", userID)
+		}
 	}
 
 	// Add error handling

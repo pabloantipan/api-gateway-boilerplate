@@ -48,3 +48,6 @@ coverage.out
 # Dependency directories (remove if you're committing vendor/)
 /vendor/
 /Godeps/
+
+service-accounts/*.json
+!service-accounts/example.json
