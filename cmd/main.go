@@ -34,16 +34,25 @@ func main() {
 	authMiddleware := middleware.NewAuthMiddleware(authService, cfg.AuthWhitelistedPaths)
 
 	// Initialize Handlers
+	authHandler := handler.NewAuthHandler(authService)
 	gatewayHandler := handler.NewGatewayHandler(gatewayService)
-
-	// Setup middleware
-	finalHandler := authMiddleware.Handle(gatewayHandler)
+	healthHandler := handler.NewHealthHandler("1.0.0")
 
 	// Setup router
-	http.Handle("/", finalHandler)
-	// http.Handle("/", finalHandler)
+	mux := http.NewServeMux()
+
+	// Health check
+	mux.Handle("/health", healthHandler)
+
+	// Auth endpoints
+	mux.HandleFunc("/login/v1/auth/login", authHandler.Login)
+
+	// Protected endpoints
+	protectedHandler := authMiddleware.Handle(gatewayHandler)
+	// http.Handle("/", protectedHandler)
+	mux.Handle("/api/v1/{path...}", protectedHandler)
 
 	// Start server
 	log.Printf("Starting API Gateway on port %s", cfg.Port)
-	log.Fatal(http.ListenAndServe(":"+cfg.Port, nil))
+	log.Fatal(http.ListenAndServe(":"+cfg.Port, mux))
 }

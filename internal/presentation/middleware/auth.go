@@ -29,21 +29,6 @@ func NewAuthMiddleware(authService service.AuthService, whitelistedPaths []strin
 	}
 }
 
-func (m *AuthMiddleware) isWhitelisted(path string) bool {
-	// Clean and normalize
-	cleanPath := strings.TrimSpace(path)
-	cleanPath = strings.Trim(cleanPath, "/")
-
-	// Check if path is whitelisted
-	for _, pattern := range m.whitelistPaths {
-		if pattern.Match(cleanPath) {
-			return true
-		}
-	}
-
-	return false
-}
-
 func (m *AuthMiddleware) Handle(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -71,6 +56,21 @@ func (m *AuthMiddleware) Handle(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func (m *AuthMiddleware) isWhitelisted(path string) bool {
+	// Clean and normalize
+	cleanPath := strings.TrimSpace(path)
+	cleanPath = strings.Trim(cleanPath, "/")
+
+	// Check if path is whitelisted
+	for _, pattern := range m.whitelistPaths {
+		if pattern.Match(cleanPath) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func extractToken(r *http.Request) string {

@@ -8,7 +8,7 @@ type ServiceConfig struct {
 var SERVICE_PATHS = map[string]ServiceConfig{
 	"players": {
 		BaseURL: "http://localhost:8085",
-		Paths:   []string{"/api/v1/players"},
+		Paths:   []string{"v1/players"},
 	},
 	// Add new services:
 	/*

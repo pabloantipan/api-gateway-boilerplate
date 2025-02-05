@@ -8,6 +8,8 @@ require (
 	google.golang.org/api v0.170.0
 )
 
+require github.com/gorilla/mux v1.8.1 // indirect
+
 require (
 	cloud.google.com/go v0.112.1 // indirect
 	cloud.google.com/go/compute v1.24.0 // indirect
