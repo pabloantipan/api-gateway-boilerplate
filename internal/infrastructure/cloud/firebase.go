@@ -9,15 +9,17 @@ import (
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
+	"github.com/pabloantipan/go-api-gateway-poc/config"
 	"google.golang.org/api/option"
 )
 
 type FirebaseClient struct {
-	auth *auth.Client
+	auth      *auth.Client
+	webAPIKey string
 }
 
-func NewFirebaseClient(ctx context.Context, credentialsFile string) (*FirebaseClient, error) {
-	opt := option.WithCredentialsFile(credentialsFile)
+func NewFirebaseClient(ctx context.Context, cfg *config.Config) (*FirebaseClient, error) {
+	opt := option.WithCredentialsFile(cfg.FirebaseCredentialsFile)
 	app, err := firebase.NewApp(ctx, nil, opt)
 	if err != nil {
 		return nil, err
@@ -28,8 +30,11 @@ func NewFirebaseClient(ctx context.Context, credentialsFile string) (*FirebaseCl
 		return nil, err
 	}
 
+	fmt.Println("Firebase client created", cfg.FirebaseWebAPIKey)
+
 	return &FirebaseClient{
-		auth: authClient,
+		auth:      authClient,
+		webAPIKey: cfg.FirebaseWebAPIKey,
 	}, nil
 }
 
@@ -37,25 +42,11 @@ func (fc *FirebaseClient) VerifyToken(ctx context.Context, token string) (*auth.
 	return fc.auth.VerifyIDToken(ctx, token)
 }
 
-// func (fc *FirebaseClient) SignInWithPassword(ctx context.Context, email, password string) (string, error) {
-// 	user, err := fc.auth.GetUserByEmail(ctx, email)
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	token, err := fc.auth.CustomToken(ctx, user.UID)
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	return token, nil
-// }
-
 func (fc *FirebaseClient) SignInWithPassword(ctx context.Context, email, password string) (string, error) {
 
 	signInURL := fmt.Sprintf(
 		"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=%s",
-		"AIzaSyDxQPCvqDyenFVNPRi56P5pzvET09ryVMc",
+		fc.webAPIKey,
 	)
 
 	reqBody := map[string]interface{}{

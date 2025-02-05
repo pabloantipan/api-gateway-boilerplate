@@ -15,10 +15,13 @@ import (
 
 func main() {
 	ctx := context.Background()
-	cfg := config.NewConfig()
+	cfg, err := config.NewConfig()
+	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
+	}
 
 	// Initialize Cloud dependenicies
-	firebaseClient, err := cloud.NewFirebaseClient(ctx, cfg.FirebaseCredentialsFile)
+	firebaseClient, err := cloud.NewFirebaseClient(ctx, cfg)
 	if err != nil {
 		log.Fatalf("Failed to initialize Firebase: %v", err)
 	}
