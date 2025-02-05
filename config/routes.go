@@ -18,7 +18,7 @@ func NewRouterConfig() *RouterConfig {
 				Path:        "/api/v1/players",
 				TargetURL:   "http://localhost:8085",
 			},
-			// Easy to add new routes
+			// Add new routes
 			"/api/v1/users": {
 				ServiceName: "users",
 				Path:        "/api/v1/users",
