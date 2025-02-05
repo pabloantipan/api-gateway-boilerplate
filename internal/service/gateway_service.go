@@ -3,27 +3,27 @@ package service
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/pabloantipan/go-api-gateway-poc/config"
-	"github.com/pabloantipan/go-api-gateway-poc/internal/data/repository"
 	"github.com/pabloantipan/go-api-gateway-poc/internal/infrastructure/proxy"
 )
 
 type gatewayService struct {
-	routeRepo    repository.RouteRepository
 	routerConfig *config.RouterConfig
 	proxyFactory *proxy.ProxyFactory
 }
 
-func NewGatewayService(repo repository.RouteRepository) GatewayService {
+func NewGatewayService() GatewayService {
 	return &gatewayService{
-		routeRepo:    repo,
+		routerConfig: config.NewRouterConfig(),
 		proxyFactory: proxy.NewProxyFactory(),
 	}
 }
 
 func (s *gatewayService) ProxyRequest(w http.ResponseWriter, r *http.Request) error {
-	route, exists := s.routerConfig.GetRoute(r.URL.Path)
+	path := strings.TrimSuffix(r.URL.Path, "/")
+	route, exists := s.routerConfig.GetRoute(path)
 	if !exists {
 		return fmt.Errorf("no route found")
 	}
@@ -33,20 +33,7 @@ func (s *gatewayService) ProxyRequest(w http.ResponseWriter, r *http.Request) er
 		return err
 	}
 
-	proxy.ServeHTTP(w, r)
-	return nil
-}
-
-func (s *gatewayService) ProxyRequestFromRepo(w http.ResponseWriter, r *http.Request) error {
-	route, err := s.routeRepo.GetRoute(r.URL.Path)
-	if err != nil {
-		return err
-	}
-
-	proxy, err := s.proxyFactory.GetProxy(route.TargetURL)
-	if err != nil {
-		return err
-	}
+	fmt.Println(route)
 
 	proxy.ServeHTTP(w, r)
 	return nil

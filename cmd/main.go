@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/pabloantipan/go-api-gateway-poc/config"
-	"github.com/pabloantipan/go-api-gateway-poc/internal/data/repository"
 	"github.com/pabloantipan/go-api-gateway-poc/internal/infrastructure/cloud"
 	"github.com/pabloantipan/go-api-gateway-poc/internal/presentation/handler"
 	"github.com/pabloantipan/go-api-gateway-poc/internal/presentation/middleware"
@@ -27,11 +26,10 @@ func main() {
 	}
 
 	// Initialize Repositories
-	routeRepo := repository.NewRouteRepository(cfg)
 
 	// Initialize Services
 	authService := service.NewAuthService(firebaseClient)
-	gatewayService := service.NewGatewayService(routeRepo)
+	gatewayService := service.NewGatewayService()
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(authService, cfg.AuthWhitelistedPaths)
@@ -40,6 +38,7 @@ func main() {
 	authHandler := handler.NewAuthHandler(authService)
 	gatewayHandler := handler.NewGatewayHandler(gatewayService)
 	healthHandler := handler.NewHealthHandler("1.0.0")
+	protectedHandler := authMiddleware.Handle(gatewayHandler)
 
 	// Setup router
 	mux := http.NewServeMux()
@@ -51,8 +50,6 @@ func main() {
 	mux.HandleFunc("/login/v1/auth/login", authHandler.Login)
 
 	// Protected endpoints
-	protectedHandler := authMiddleware.Handle(gatewayHandler)
-	// http.Handle("/", protectedHandler)
 	mux.Handle("/api/v1/{path...}", protectedHandler)
 
 	// Start server

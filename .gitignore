@@ -51,3 +51,5 @@ coverage.out
 
 service-accounts/*.json
 !service-accounts/example.json
+
+postman.http

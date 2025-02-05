@@ -30,8 +30,6 @@ func NewFirebaseClient(ctx context.Context, cfg *config.Config) (*FirebaseClient
 		return nil, err
 	}
 
-	fmt.Println("Firebase client created", cfg.FirebaseWebAPIKey)
-
 	return &FirebaseClient{
 		auth:      authClient,
 		webAPIKey: cfg.FirebaseWebAPIKey,

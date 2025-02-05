@@ -1,5 +1,7 @@
 package config
 
+import "fmt"
+
 type Route struct {
 	ServiceName string
 	Path        string
@@ -29,6 +31,11 @@ func NewRouterConfig() *RouterConfig {
 }
 
 func (rc *RouterConfig) GetRoute(path string) (Route, bool) {
+	if rc.routes == nil {
+		fmt.Println("No routes found")
+		rc.routes = make(map[string]Route)
+	}
+
 	route, exists := rc.routes[path]
 	return route, exists
 }
