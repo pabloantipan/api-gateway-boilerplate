@@ -46,14 +46,17 @@ func main() {
 	authHandler := handler.NewAuthHandler(authService)
 	gatewayHandler := handler.NewGatewayHandler(gatewayService)
 
-	healthHandler := rateLimiter.Handle(
-		handler.NewHealthHandler("1.0.0"))
+	healthChain := middleware.NewChain().Add(rateLimiter.Handle)
+	healthHandler := healthChain.Then(handler.NewHealthHandler("1.0.0"))
 
-	protectedHandler :=
-		rateLimiter.Handle(
-			requestLoggerMiddleware.Handle(
-				responseLoggerMiddleware.Handle(
-					authMiddleware.Handle(gatewayHandler))))
+	protectedChain := middleware.NewChain().
+		Add(requestLoggerMiddleware.Handle).
+		Add(responseLoggerMiddleware.Handle).
+		Add(rateLimiter.Handle).
+		Add(authMiddleware.Handle)
+
+	protectedHandler := protectedChain.
+		Then(gatewayHandler)
 
 	// Setup router
 	mux := http.NewServeMux()
