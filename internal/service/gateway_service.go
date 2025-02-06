@@ -33,8 +33,6 @@ func (s *gatewayService) ProxyRequest(w http.ResponseWriter, r *http.Request) er
 		return err
 	}
 
-	fmt.Println(route)
-
 	proxy.ServeHTTP(w, r)
 	return nil
 }

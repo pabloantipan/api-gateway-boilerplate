@@ -1,7 +1,5 @@
 package config
 
-import "fmt"
-
 type Route struct {
 	ServiceName string
 	Path        string
@@ -21,21 +19,16 @@ func NewRouterConfig() *RouterConfig {
 				TargetURL:   "http://localhost:8085",
 			},
 			// Add new routes
-			"/api/v1/users": {
-				ServiceName: "users",
-				Path:        "/api/v1/users",
-				TargetURL:   "http://localhost:8086",
-			},
+			// "/api/v1/users": {
+			// 	ServiceName: "users",
+			// 	Path:        "/api/v1/users",
+			// 	TargetURL:   "http://localhost:8086",
+			// },
 		},
 	}
 }
 
 func (rc *RouterConfig) GetRoute(path string) (Route, bool) {
-	if rc.routes == nil {
-		fmt.Println("No routes found")
-		rc.routes = make(map[string]Route)
-	}
-
 	route, exists := rc.routes[path]
 	return route, exists
 }

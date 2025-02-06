@@ -25,7 +25,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "name": "John Doe",
+  "name": "John Doe 4",
   "age": 25,
   "position": "Midfielder",
   "rating": 23

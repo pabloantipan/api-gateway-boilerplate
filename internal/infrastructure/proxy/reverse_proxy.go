@@ -42,20 +42,29 @@ func (f *ProxyFactory) GetProxy(targetURL string) (*httputil.ReverseProxy, error
 	proxy.Director = func(req *http.Request) {
 		originalDirector(req)
 
-		// Preserve the target host
-		req.Header.Add("X-Gateway", "api-gateway")
+		req.URL.Scheme = target.Scheme
+		req.URL.Host = target.Host
+
+		/*
+			if you need this to avoid status 307; it is due the downstream MS
+			is unproperly configured. Look if your endpoint is specting '/' at the end
+
+			if !strings.HasSuffix(req.URL.Path, "/") {
+				req.URL.Path = req.URL.Path + "/"
+			}
+		*/
+
 		req.Host = target.Host
 
-		// Add gateway headers
+		req.Host = target.Host
 		req.Header.Add("X-Gateway", "api-gateway")
 
-		// UserID already set by auth middleware
 		if userID := req.Header.Get("X-User-ID"); userID != "" {
 			req.Header.Add("X-User-ID", userID)
 		}
+
 	}
 
-	// Add error handling
 	proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
 		http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
 	}

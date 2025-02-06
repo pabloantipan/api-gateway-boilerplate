@@ -16,7 +16,6 @@ type AuthMiddleware struct {
 }
 
 func NewAuthMiddleware(authService service.AuthService, whitelistedPaths []string) *AuthMiddleware {
-	// Compile whitelist paths
 	patterns := make([]glob.Glob, 0, len(whitelistedPaths))
 	for _, path := range whitelistedPaths {
 		if g, err := glob.Compile(path); err != nil {
@@ -45,8 +44,6 @@ func (m *AuthMiddleware) Handle(next http.Handler) http.Handler {
 			return
 		}
 
-		// fmt.Println("Token: ", token)
-
 		userID, err := m.authService.ValidateToken(r.Context(), token)
 		if err != nil {
 			log.Printf("Token validation error: %v", err)
@@ -55,7 +52,9 @@ func (m *AuthMiddleware) Handle(next http.Handler) http.Handler {
 		}
 
 		// Add user info to context
-		ctx := context.WithValue(r.Context(), "userID", userID)
+		type contextKey string
+		const userIDKey contextKey = "userID"
+		ctx := context.WithValue(r.Context(), userIDKey, userID)
 		r.Header.Set("X-User-ID", userID)
 
 		next.ServeHTTP(w, r.WithContext(ctx))

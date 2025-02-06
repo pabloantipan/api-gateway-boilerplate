@@ -25,6 +25,11 @@ func main() {
 		log.Fatalf("Failed to initialize Firebase: %v", err)
 	}
 
+	logger, err := cloud.NewCloudLogger(cfg)
+	if err != nil {
+		log.Fatalf("Failed to initialize Cloud Logger: %v", err)
+	}
+
 	// Initialize Repositories
 
 	// Initialize Services
@@ -32,13 +37,20 @@ func main() {
 	gatewayService := service.NewGatewayService()
 
 	// Initialize middleware
+	requestLoggerMiddleware := middleware.NewRequestLoggerMiddleware(logger)
+	responseLoggerMiddleware := middleware.NewResponseLoggerMiddleware(logger)
 	authMiddleware := middleware.NewAuthMiddleware(authService, cfg.AuthWhitelistedPaths)
 
 	// Initialize Handlers
 	authHandler := handler.NewAuthHandler(authService)
 	gatewayHandler := handler.NewGatewayHandler(gatewayService)
 	healthHandler := handler.NewHealthHandler("1.0.0")
-	protectedHandler := authMiddleware.Handle(gatewayHandler)
+
+	protectedHandler := requestLoggerMiddleware.Handle(
+		responseLoggerMiddleware.Handle(
+			authMiddleware.Handle(gatewayHandler)))
+
+	// protectedHandler := authMiddleware.Handle(gatewayHandler)
 
 	// Setup router
 	mux := http.NewServeMux()
@@ -50,7 +62,7 @@ func main() {
 	mux.HandleFunc("/login/v1/auth/login", authHandler.Login)
 
 	// Protected endpoints
-	mux.Handle("/api/v1/{path...}", protectedHandler)
+	mux.Handle("/api/v1/", protectedHandler)
 
 	// Start server
 	log.Printf("Starting API Gateway on port %s", cfg.Port)

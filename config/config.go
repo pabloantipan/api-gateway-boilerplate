@@ -8,11 +8,12 @@ import (
 )
 
 type Config struct {
-	Port                    string
-	FirebaseCredentialsFile string
-	FirebaseWebAPIKey       string
-	Services                map[string]constants.ServiceConfig
-	AuthWhitelistedPaths    []string
+	Port                        string
+	ProjectID                   string
+	CloudLoggingCredentialsFile string
+	FirebaseCredentialsFile     string
+	FirebaseWebAPIKey           string
+	AuthWhitelistedPaths        []string
 }
 
 func NewConfig() (*Config, error) {
@@ -21,10 +22,11 @@ func NewConfig() (*Config, error) {
 	}
 
 	return &Config{
-		Port:                    os.Getenv("PORT"),
-		FirebaseCredentialsFile: os.Getenv("FIREBASE_SERVICE_ACCOUNT_FILE"),
-		FirebaseWebAPIKey:       os.Getenv("FIREBASE_WEB_API_KEY"),
-		Services:                constants.SERVICE_PATHS,
-		AuthWhitelistedPaths:    constants.AUTH_WHITELIST_PATHS,
+		Port:                        os.Getenv("PORT"),
+		ProjectID:                   os.Getenv("PROJECT_ID"),
+		CloudLoggingCredentialsFile: os.Getenv("LOGGING_SERVICE_ACCOUNT_FILE"),
+		FirebaseCredentialsFile:     os.Getenv("FIREBASE_SERVICE_ACCOUNT_FILE"),
+		FirebaseWebAPIKey:           os.Getenv("FIREBASE_WEB_API_KEY"),
+		AuthWhitelistedPaths:        constants.AUTH_WHITELIST_PATHS,
 	}, nil
 }
